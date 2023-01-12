@@ -15,3 +15,4 @@ The file *Syllabus.pdf* is the official course syllabus.
 Deleting what Geoff did
 That actually didnt workThis README file contains information about my uploaded assignments
 I am totally lost now
+I log out of this and had to enter the whole other code again
