@@ -11,3 +11,4 @@ Additionally, detailed assignment instructions will be here as they become avail
 The file *Syllabus.pdf* is the official course syllabus.
 
 1st comment
+2nd Comment
