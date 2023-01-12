@@ -12,3 +12,4 @@ The file *Syllabus.pdf* is the official course syllabus.
 
 1st comment
 2nd Comment
+Deleting what Geoff did
