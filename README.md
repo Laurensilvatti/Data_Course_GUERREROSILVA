@@ -1,4 +1,4 @@
-# Data Analysis Course - Utah Valley University
+# Data Analysis Course - Utah Valley University. Lauren Guerrero 
 
 This site serves as a repository for all class material.
 
