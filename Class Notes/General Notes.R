@@ -1,1 +1,0 @@
-# Class notes Jan 17
