@@ -1,0 +1,35 @@
+#doing assignment 2
+# 4
+csv_files <- list.files(path='Data',
+                        pattern = '.csv',
+                        full.names = TRUE)
+
+#5 
+length(csv_files)
+
+#6 
+df <- read.csv('Data/wingspan_vs_mass.csv')
+
+#7
+?head # head(df is the assigment we gave it at this file)
+head(df, n=5)
+
+#8 
+b <- list.files(recursive = TRUE,
+           path = "Data",
+           pattern = '^b',full.names = TRUE) # ^ begging with
+    #list.files(recursive = TRUE,
+           #path = "Data",
+           #pattern = 'csv$') # word$ $ ends with
+#9 
+for( i in b){
+  print(readLines(i,1))
+}
+
+#10
+
+for(l in csv_files){
+  print(readLines(l,1))
+}
+
+#for loops ???
