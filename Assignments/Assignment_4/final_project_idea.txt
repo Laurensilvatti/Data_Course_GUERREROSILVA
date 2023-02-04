@@ -1,0 +1,21 @@
+#1 txt file called final_project_idea.txt created.
+#2
+For my final project I will attempt to analyze the data form a project I am woking on with Dr. Thompson and Kimberlyn Argyle. 
+The project consist of observing sexual behavior in mice, and recoding data based on the differences in these behaviors. We will be using wild type mice (control group) and pomc deficient mice. 
+Most data we are collecting in qualitative; and will answer to simple yes or no questions on whether the behavior was present or not. Within these records we might add a time frame in which the behavior was present. 
+#3
+Some examples of expected sexual behaviors are:
+-High pitch calls, which will be measured by a USV device. 
+-Rooting: is the behavior present or not
+-Sniffing: is the behavior present or not
+-Penetration: is the behavior present or not
+-Time of intromition. 
+
+The prediction is that the pomc deficient mice will not present all of these behaviors and if they do, we are hoping to see significant differences between them and the wild type mice. 
+
+#4
+df<-read.csv("./Assignments/Assignment_4/Project_Data_fake.csv")
+
+#5.
+
+library(tidyverse)library(ggplot2)library(janitor)#install.packages("janitor")df<-read.csv("./Assignments/Assignment_4/Project_Data_fake.csv")df<- df %>% clean_names()df$avg_grooming <- mean(df$grooming_sec)df$avg_sniffing <- mean(df$sniffing_sec)df$avg_rooting <- mean(df$rooting_sec)df$avg_no_cont <- mean(df$no_contact_sec)df %>%  pivot_longer(avg_grooming:avg_no_cont) %>%  mutate(across(where(is.character), as.factor)) %>%  ggplot(aes(x = groups, y = value, fill=name))+  geom_col(position = "dodge", width=0.75) +  theme(legend.position = "bottom", )+  labs(fill="",       y="Time in Seconds",        x="Groups")ggsave("./Assignments/Assignment_4/Fake_plot.png",width=12, height =12, dpi =150)
