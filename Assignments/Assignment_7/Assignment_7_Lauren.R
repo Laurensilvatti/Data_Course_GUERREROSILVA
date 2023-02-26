@@ -24,8 +24,7 @@ clean_1 %>%
   ggplot(aes(x=reorder(county,pop_2010),y=proportion,
                      color = religion)) +
   facet_wrap(~religion) +
-  geom_point(alpha = 1) +
-  geom_smooth(se=TRUE, method = "lm") +
+  geom_point() +
   theme(axis.text.x = element_text(angle = 90,
                                    size = 8,
                                    vjust = .5)) +
