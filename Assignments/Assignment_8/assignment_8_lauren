@@ -1,0 +1,35 @@
+# part 2
+
+# 1. I dont think any of my models is right and I honestly am having a hard time interpreting the data. 
+
+# 2.
+# I am sure that if I plotted my data correcley I would have found exponential relationships. 
+# to make this relationships linear I know you can turn the Y axis into a fuction of log()
+  
+  # 3.
+  
+non_linear <- read.csv("../../Data/non_linear_relationship.csv")
+
+non_linear %>% 
+  ggplot(aes(x=predictor,y=response)) +
+  geom_point() 
+
+test1 <- glm(data = non_linear,
+                 formula = response ~ predictor)
+summary(test1)
+
+# Plot the log() of the response and make it linear 
+non_linear %>% 
+  ggplot(aes(x=predictor,y= log(response))) +
+  geom_point() +
+  geom_smooth() +
+  theme_minimal()
+
+linear_mod <- glm(data = non_linear,
+              formula = log(response) ~ predictor)
+summary(linear_mod)
+compare_performance(crappymod,logmod) %>% plot
+# I am having a very very very hard time with this topics.... :(
+
+
+
