@@ -1,0 +1,81 @@
+---
+title: "Lauren_Assignment_9_markdown"
+output: html_document
+date: "2023-03-23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+## Assigment # 9
+Creating 4 different prediction models based on Graduate School Admissions Data. 
+
+The followig shows statistical information about the performance of each model
+
+
+
+```{r}
+library(modelr)
+library(easystats)
+library(broom)
+library(tidyverse)
+library(fitdistrplus)
+library(janitor)
+library(patchwork)
+
+dat <- read_csv("../../Data/GradSchool_Admissions.csv")
+dat$admit <- as.logical(dat$admit)  
+dat$rank <- as.factor(dat$rank)
+
+mod1 <- glm(data = dat,
+            formula = admit ~ (gre + gpa) * rank,
+            family = "binomial")
+summary(mod1)
+
+mod2 <- glm(data = dat,
+            formula = admit ~ (gre * gpa) + rank,
+            family = "binomial")
+summary(mod2)
+
+mod3 <- glm(data = dat,
+            formula = admit ~ gre * gpa * rank,
+            family = "binomial")
+summary(mod3)
+
+mod4 <- glm(data = dat,
+            formula = admit ~ gre * gpa,
+            family = "binomial")
+summary(mod4)
+```
+
+Creating a plot that compares my 4 models
+```{r}
+compare_performance(mod1,mod2,mod3,mod4) %>% plot()
+```
+
+Plotting some predictions
+
+```{r}
+library(modelr)
+library(easystats)
+library(broom)
+library(tidyverse)
+library(fitdistrplus)
+library(janitor)
+library(patchwork)
+add_predictions(dat, mod2, type = "response") %>% 
+  ggplot(aes(x= gpa, y = pred, color = rank, group= rank)) +
+  geom_smooth(se = FALSE) +
+  theme_minimal()
+
+add_predictions(dat, mod2, type = "response") %>% 
+  ggplot(aes(x=gre, y=pred, color= rank, group=rank)) +
+  geom_smooth(se = FALSE) +
+  theme_minimal()
+```
+
+If this HTML looks horrible, please note I was not present in this lecture.
+No recording of the class was provided.
+
+I was constipated -haven't pooped in 4 days. Any advise?
