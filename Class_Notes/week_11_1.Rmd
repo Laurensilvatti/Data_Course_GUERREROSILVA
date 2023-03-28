@@ -1,0 +1,113 @@
+---
+title: "week_11_1"
+output: html_document
+date: "2023-03-28"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(easystats)
+library(plotly)
+library(kableExtra)
+library(janitor)
+library(patchwork)
+theme_set(theme_minimal())
+
+```
+
+### Import data
+Here's a look at the whole data set. This was stored as ";" delimited and "," was used as
+decimal point
+
+``` {r}
+df <- read_csv2("../Data/mee312226-sup-0003-datas1.csv") %>% 
+   clean_names()
+df %>% 
+  kable() %>% 
+  kable_classic(lightable_options = "hover") %>% 
+   scroll_box(height = "200px")
+```
+This data set is humerus, femur, and tibia measurement in birds. Our goal is to build a model that uses
+this measures to predict body mass. 
+ ___
+### Cleaning
+We have to do a few data tidying tasks. 
+``` {r echo= TRUE}
+df <- 
+  df %>% 
+   mutate(femoral_pneumaticity = case_when(femoral_pneumaticity == "yes" ~ TRUE,
+                                           femoral_pneumaticity == "no" ~ FALSE) %>% 
+          as.logical(), 
+          body_mass_log10 = log10(body_mass_g))
+df %>% 
+   filter(species %in% df[which(df$species %>% duplicated()),]$species) %>% 
+   kable() %>% 
+   kable_classic()
+
+```
+ ### Visulizing
+``` {r}
+femur <- df %>%
+   pivot_longer(starts_with("femur_"), 
+                 names_to = "measurement",
+                 values_to = "mm",
+                 names_prefix = "femur_") %>% 
+    ggplot(aes(x=mm, y = body_mass_g)) + 
+    geom_point() +
+    geom_smooth() +
+    facet_wrap(~measurement, scales = "free")  +
+    labs(y= "Body mass (g)", x= "Length (mm)", title = "Femur messurement")
+  
+humerus <- df %>%
+  pivot_longer(starts_with("humerus_"), 
+                 names_to = "measurement",
+                 values_to = "mm",
+                 names_prefix = "humerus_") %>% 
+    ggplot(aes(x=mm, y = body_mass_g))  +
+    geom_point() +
+    geom_smooth() +
+    facet_wrap(~measurement, scales = "free") + 
+    labs(y= "Body mass (g)", x= "Length (mm)", title = "Humerus messurement")
+
+tibia <- df %>%
+  pivot_longer(starts_with("tibia_"), 
+                 names_to = "measurement",
+                 values_to = "mm",
+                 names_prefix = "tibia_") %>% 
+    ggplot(aes(x=mm, y = body_mass_g)) + 
+    geom_point() +
+    geom_smooth() +
+    facet_wrap(~measurement, scales = "free")+  
+    labs(y= "Body mass (g)", x= "Length (mm)", title = "Tibia messurement")
+  
+    
+femur / humerus / tibia
+  
+```
+
+
+  ### Modeling
+``` {r}
+mod1 <- glm(data = df,
+            formula = body_mass_log10 ~ (humerus_length + humerus_circumference +  
+            femur_length + femur_circumference + 
+            tibia_length + tibia_circumference) * femoral_pneumaticity)
+mod1 %>% 
+  broom::tidy() %>% 
+  dplyr::filter(p.value <= 0.05) %>% 
+  kable() %>% 
+  kable_classic(lightable_options = "hover")
+
+```
+
+How well we model:
+
+``` {r}
+modelr::add_predictions(df,mod1) %>%
+  mutate(pred_g = pred^10,
+         residuals = abs(body_mass_g - pred_g)) %>%
+  ggplot(aes(x= pred_g,y=body_mass_g)) +
+  geom_point() +
+  geom_smooth()
+
+```

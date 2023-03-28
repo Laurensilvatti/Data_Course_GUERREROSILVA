@@ -94,7 +94,11 @@ mod1 <- glm(data = tidy_data,
             formula = mortality_rate ~ year)
 summary(mod1)
 
-add_predictions(Ecuador_2020_my_pred, model = mod1)
+add_predictions(Ecuador_2020_my_pred, model = mod1) %>% 
+  mutate(difference=pred-mortality_rate)
+
+mod1$formula
+
 # Model 1 is exactly the same as the mod4 I created, so I deleted it and used model 1
 
 final <- data.frame(Model = "mod1",
@@ -104,3 +108,15 @@ final <- data.frame(Model = "mod1",
 final$difference <-  final$Reality - final$Prediction
 
 final
+
+#geoff part
+tidy_data %>% 
+  ggplot(aes(x=log10(mortality_rate))) + geom_density()
+
+
+mod4 <- glm(data = tidy_data,
+            formula = log10(mortality_rate) ~ year + region)
+add_predictions(tidy_data,mod4) %>% 
+  mutate(pred2 = 10^pred) %>% 
+  filter(country_name=="Ecuador" & year == 2000)
+

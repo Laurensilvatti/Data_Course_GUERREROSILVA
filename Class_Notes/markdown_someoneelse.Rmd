@@ -1,0 +1,33 @@
+---
+title: "My first report"
+output: html_document
+date: "2023-03-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+This is my first report. Or my chemistry lab homework or whatever. 
+
+I can **bold** some text or even make it *italic*
+
+here's a plot of penguins:
+
+```{r}
+library(palmerpenguins)
+library(tidyverse)
+penguins %>% 
+  ggplot(aes(x=sex, y=body_mass_g, color=species)) +  geom_boxplot()
+
+
+
+
+
+```
+here is a picture of a hamburger which penguins love to eat:
+
+```{r}
+knitr::include_graphics("./hamburger.png")
+```
+

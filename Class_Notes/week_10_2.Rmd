@@ -1,0 +1,45 @@
+---
+title: "week_10_2"
+output: html_document
+date: "2023-03-23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+Coding in a webpage:
+
+```{bash}
+#pwd
+#ls
+#cd
+```
+
+```{r,out.height=600,out.width=800}
+knitr::include_graphics("../little_thing.jpeg")
+```
+Here is mpg data set:
+```{r}
+library(tidyverse)
+library(kableExtra)
+library(plotly)
+
+mpg %>% 
+  kable() %>% 
+  kable_classic(lightable_option = 'hover') %>% 
+  scroll_box(width = "500px", height = "200px")
+
+p <- mpg %>% 
+  ggplot(aes(x=displ, y=cty)) +
+  geom_point() +
+  geom_smooth()
+
+ggplotly(p)
+
+# great stuff
+```
+<br>
+___
+
+
+The mean cty miles per gallon is `r round(mean(mpg$cty), 2)` in this data set.
