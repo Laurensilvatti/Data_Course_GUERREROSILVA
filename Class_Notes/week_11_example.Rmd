@@ -1,0 +1,153 @@
+---
+output: 
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: false
+pagetitle: Lab_8
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE,message = FALSE)
+library(tidyverse)
+library(easystats)
+library(plotly)
+library(kableExtra)
+library(janitor)
+library(patchwork)
+theme_set(theme_minimal())
+```
+
+
+```{r}
+# custom function to read in data
+read_vernier <- function(path){
+  txt <- readLines(path)
+    starts <- grep("Vernier",txt)
+  skips <- starts+6
+  skips <- skips[1:length(skips)-1]
+  df_list <- list()
+  for(i in seq_along(skips)){
+    run <- read_delim(file=path,
+                      col_names = FALSE,
+                      delim = "\t",
+                      skip = skips[i],
+    )
+    run$X4 <- NULL # remove empty column
+    names(run) <- c("volume","pH","temp_c")# rename columns
+    run$run <- paste0("run_",i) # add run name column
+    max_n <- min(grep("Vernier",run$volume)) - 1 
+    run <- run[1:(max_n),]# subset to remove everything after that
+    run <- run %>%
+      mutate(volume = as.numeric(volume),
+             pH = as.numeric(pH),
+             temp_c = as.numeric(temp_c))# convert to numeric
+    df_list[[i]] <- run # add to list of data frames
+  }
+  df_all <- reduce(df_list,full_join)
+  return(df_all)
+}
+```
+
+
+
+
+# Load and Tidy Data
+
+```{r}
+df <- read_vernier("~/OneDrive/Documentos/Chem 1225/lab8.txt")
+
+# Need to change anything?
+names(df) <- c("volume","pH","first_deriv","run")
+df <- df %>% 
+  mutate(buffered = case_when(run=="run_1" ~ FALSE,
+                              run=="run_3" ~ FALSE,
+                              TRUE ~ TRUE),
+         acid_base = case_when(run=="run_1" ~ "base",
+                               run=="run_2" ~ "base",
+                               TRUE ~ "acid"))
+df[df$run %in% c("run_3","run_4"),"first_deriv"] <- NA
+```
+
+<br>
+___
+<br>
+
+# Background
+
+Lab report text goes here. Hypotheses or whatever....
+
+<br>
+___
+<br>
+
+
+# Visualize
+
+```{r}
+df %>% 
+  filter(run %in% c("run_1","run_2")) %>% 
+  # pivot_longer(c(pH,first_deriv))
+  ggplot(aes(x=volume)) +
+  geom_point(aes(y=pH),color="black") +
+  geom_point(aes(y=first_deriv),color="red",se=FALSE) +
+  geom_line(aes(y=pH),color="black") +
+  geom_line(aes(y=first_deriv),color="red",se=FALSE) +
+  facet_wrap(~run)
+```
+
+```{r}
+df %>% 
+  filter(run %in% c("run_3","run_4")) %>% 
+  ggplot(aes(x=volume,y=10^-pH,color=buffered,group=buffered)) +
+  geom_point() +
+  geom_line() +
+  labs(y="Concentration")
+
+```
+
+<br>
+___
+<br>
+
+# Model and Test
+
+
+Model formula:
+```{r}
+df2 <- df %>% 
+  filter(run %in% c("run_3","run_4"))
+
+mod <- glm(data=df2,
+    formula = 10^-pH ~ volume * buffered)
+formula(mod)
+
+```
+Model checks:
+```{r}
+check_model(mod)
+
+```
+
+<br>
+<br>
+
+Model results:
+```{r}
+broom::tidy(mod) %>% 
+  kable() %>% 
+  kable_classic(lightable_options = 'hover')
+
+```
+
+<br>
+___
+<br>
+
+
+# Conclusions
+
+
+

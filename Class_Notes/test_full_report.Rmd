@@ -1,0 +1,153 @@
+---
+output: 
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: false
+pagetitle: MyReportOnBirds
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE,message = FALSE)
+library(tidyverse)
+library(easystats)
+library(plotly)
+library(kableExtra)
+library(janitor)
+library(patchwork)
+theme_set(theme_minimal())
+```
+
+# Import data
+
+
+Here's a look at the full data set. This was stored as ";" delimited and "," was used as a decimal point.
+
+```{r}
+df <- read_csv2("../Data/mee312226-sup-0003-datas1.csv") %>% 
+  clean_names()
+
+df %>% 
+  kable() %>% 
+  kable_classic(lightable_options = 'hover') %>% 
+  scroll_box(height = '200px')
+
+```
+
+This data set is of humerus, femur, and tibia measurements in birds. Our goal is to see if we can build a model that uses these measures to predict body mass.
+
+___
+
+# Cleaning
+
+We have to do a few data tidying tasks first...
+
+```{r echo=TRUE}
+df <- df %>% 
+  mutate(femoral_pneumaticity = case_when(femoral_pneumaticity == "yes" ~ TRUE,
+                                          femoral_pneumaticity == "no" ~ FALSE),
+         body_mass_log10 = log10(body_mass_g))
+```
+
+A couple of species are present more thann once in this data set with different measurements. We are choosing to leave these in.
+
+```{r}
+df %>% 
+  dplyr::filter(species %in% df[which(df$species %>% duplicated()),]$species) %>% 
+  kable() %>% 
+  kable_classic()
+```
+
+
+___
+
+
+# Visualizing
+
+```{r}
+femur <- df %>% 
+  pivot_longer(starts_with("femur_"),
+               names_to = "measurement",
+               values_to = "mm",
+               names_prefix = "femur_") %>% 
+  ggplot(aes(x=mm,y=body_mass_g)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~measurement,scales = 'free') +
+  labs(y="Body mass (g)",x="Length (mm)",title = "Femur measurements")
+humerus <- df %>% 
+  pivot_longer(starts_with("humerus_"),
+               names_to = "measurement",
+               values_to = "mm",
+               names_prefix = "humerus_") %>% 
+  ggplot(aes(x=mm,y=body_mass_g)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~measurement,scales = 'free') +
+  labs(y="Body mass (g)",x="Length (mm)",title = "Humerus measurements")
+tibia <- df %>% 
+  pivot_longer(starts_with("tibia_"),
+               names_to = "measurement",
+               values_to = "mm",
+               names_prefix = "tibia_") %>% 
+  ggplot(aes(x=mm,y=body_mass_g)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~measurement,scales = 'free') +
+  labs(y="Body mass (g)",x="Length (mm)",title = "Tibia measurements")
+
+femur / humerus / tibia
+
+```
+
+___
+
+
+# Modeling
+
+Here's our selected model formula:
+
+```{r}
+mod1 <- glm(data=df,
+            formula = body_mass_log10 ~ (humerus_length + humerus_circumference + femur_length + femur_circumference + tibia_length + tibia_circumference) * femoral_pneumaticity)
+
+formula(mod1)
+```
+
+## Model performance
+
+Here are the significant terms from our full model:
+
+```{r}
+
+mod1 %>% 
+  broom::tidy() %>% 
+  dplyr::filter(p.value <= 0.05) %>% 
+  kable() %>% 
+  kable_classic(lightable_options = 'hover')
+```
+
+
+
+
+How well does our model predict body mass?
+
+```{r, fig.height=3,fig.width=3,fig.align='center'}
+modelr::add_predictions(df,mod1) %>% 
+  mutate(pred_g = pred^10,
+         residuals = abs(body_mass_g - pred_g)) %>% 
+  ggplot(aes(x=pred_g,y=body_mass_g)) +
+  geom_point() +
+  geom_smooth(linetype=2,color='red')
+```
+
+
+
+
+
+
+
+
+

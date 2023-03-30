@@ -1,0 +1,56 @@
+---
+title: "week_11_2"
+output: html_document
+date: "2023-03-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(easystats)
+library(plotly)
+library(kableExtra)
+library(janitor)
+library(patchwork)
+library(readxl)
+theme_set(theme_minimal())
+```
+
+### Import data
+Here's a look at the whole data set
+decimal point
+
+``` {r}
+file <- "~/OneDrive/Documentos/Chem 1225/lab8.xlsx"
+
+```
+
+Lets tidy-up this data.
+
+
+``` {r} 
+#read only the parts of Excel I selected. Delete colunm name. Each run is it own data set
+run1 <- readxl::read_xlsx(file, range = "A8:C45", col_names = FALSE)
+run2 <- readxl::read_xlsx(file, range = "D9:F47", col_names = FALSE)
+run3 <- readxl::read_xlsx(file, range = "G9:H20", col_names = FALSE)
+run4 <- readxl::read_xlsx(file, range = "J9:K22", col_names = FALSE)
+
+#made meaningful column names
+names(run1) <-c("vol_mL","pH","1st_derivative")
+names(run2) <-c("vol_mL","pH","1st_derivative")
+names(run3) <-c("vol_mL","pH")
+names(run4) <-c("vol_mL","pH")
+
+# Add third colunm to make each run one observation
+
+#add 3rd column
+run1$run <- "run_1"
+run2$run <- "run_2"
+run3$run <- "run_3"
+run4$run <- "run_4"
+
+#Comabine all data frames
+df_1 <- full_join(run1,run2,run3,run4)
+write_csv(df_1,"~/OneDrive/Documentos/Chem 1225/exp_8_cleaned.csv")
+
+```
